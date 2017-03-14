@@ -66,8 +66,8 @@ module Test_MAM_box_mod
      integer :: name_id
    
    contains
-       procedure :: setUp     ! overides generic
-       procedure :: tearDown  ! overrides generic
+       !procedure :: setUp     ! overides generic
+       !procedure :: tearDown  ! overrides generic
    end type mySetup
 
 contains
@@ -98,6 +98,7 @@ contains
         write(10,'(a)')'record 1'
         write(10,'(a)')'record 2'
         rewind(10)
+        print * , "Before"
      end subroutine mySetupWhen
 
   @After
@@ -127,7 +128,26 @@ contains
       @assertEqual(returnValue, 6 , message="Testing getunit failed.")
   end subroutine test_getunit_ok
 
-
+  @Test
+  subroutine test_cnst_get_ind(this)
+    use constituents, only: pcnst, cnst_name, cnst_get_ind
+    
+    class (mySetup), intent(inout) :: this
+    
+    
+    ! What am I testing
+    integer :: l_h2so4g, l_nh3g,  l_so2g, l_hno3g, l_hclg
+    
+    call cnst_get_ind( 'H2SO4', l_h2so4g, .false. )
+    call cnst_get_ind( 'SO2',   l_so2g,   .false. )
+    call cnst_get_ind( 'NH3',   l_nh3g,   .false. )
+    call cnst_get_ind( 'HNO3',  l_hno3g,  .false. )
+    call cnst_get_ind( 'HCL',   l_hclg,   .false. )
+    
+    print * , l_h2so4g, l_nh3g,  l_so2g, l_hno3g, l_hclg
+    
+    
+  end subroutine test_cnst_get_ind
 
 
 end module Test_MAM_box_mod
