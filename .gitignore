@@ -4,5 +4,8 @@
 # Ignore compiled files
 *.o
 
+# Ignore mod files
+*.mod
+
 # Ignore myTest directory
 /Examples/myTest*
