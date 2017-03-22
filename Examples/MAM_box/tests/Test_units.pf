@@ -85,7 +85,7 @@ contains
    ! No need to annotate tearDown() _extending_ TestCase
   subroutine tearDown(this)
       class (mySetup), intent(inout) :: this
-      
+
       print * , "Clean up in TestCase"
   end subroutine tearDown
 
@@ -101,11 +101,11 @@ contains
      end subroutine mySetupWhen
 
   @After
-     subroutine myTearDownWhen()
+     subroutine myTearDowWhen()
         implicit none
         close(10, status='delete')
         print * , "After"
-     end subroutine myTearDownWhen
+     end subroutine myTearDowWhen
 
 @Test
   subroutine test_setup(this)
