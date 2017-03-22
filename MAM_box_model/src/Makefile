@@ -108,11 +108,6 @@ OBJ9 = \
 	driver.o  \
 	main.o
 
-#-----------
-# pFUnit
-#----------
-SUT: $(OBJ1) $(OBJ2)
-
 #-----------------------------------------------------------------------------
 # WARNING: Don't touch anything below this line unless you exactly know it !!!
 #-----------------------------------------------------------------------------
@@ -137,6 +132,7 @@ $(OBJ5):  $(OBJ4)
 
 $(OBJ9):  $(OBJ5)
 
+
 rad_constituents.o: modal_aero_data.o
 
 clean:
@@ -145,5 +141,4 @@ clean:
 
 cleanmod:
 	/bin/rm  *.x  *.mod  module*.o  module*.f90  module*.f
-
 
