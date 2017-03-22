@@ -59,6 +59,7 @@ module Test_MAM_box_mod
 @TestCase
    type, extends(TestCase) :: mySetup
      
+     ! Variable definitions 
      integer :: mymin = 30, mymax = 100 , list_length=3 , value=0
      character(50) :: myname
      character(len=20) :: name_to_find
@@ -78,7 +79,7 @@ contains
       class (mySetup), intent(inout) :: this
 
       this%value = 6
-      print * , "Setup in TestCase"
+!       print * , "Setup in TestCase"
 
   end subroutine setUp
 
@@ -86,7 +87,7 @@ contains
   subroutine tearDown(this)
       class (mySetup), intent(inout) :: this
       
-      print * , "Clean up in TestCase"
+!       print * , "Clean up in TestCase"
   end subroutine tearDown
 
 ! TESTS
@@ -110,8 +111,8 @@ contains
 
 @Test
   subroutine test_setup(this)
-     ! Testing search_list_of_names
-     ! Objective : check if existing name from list is found 
+     ! Testing setup 
+     ! Objective : check which setup is called
      class (mySetup), intent(inout) :: this
      print * , "Empty test"
   
@@ -119,8 +120,8 @@ contains
    
 @Test
   subroutine test_getunit_ok(this)
-      ! Testing search_list_of_names
-      ! Objective : check if call returns false for empty name 
+      ! Testing units::getunit
+      ! Objective : check if call returns 6
       class (mySetup), intent(inout) :: this
    
       integer :: returnValue
@@ -128,8 +129,10 @@ contains
       @assertEqual(returnValue, 6 , message="Testing getunit failed.")
   end subroutine test_getunit_ok
 
-  @Test
+@Test
   subroutine test_cnst_get_ind(this)
+    ! Testing constituents::cnst_get_ind
+    ! Objective: ...
     use constituents, only: pcnst, cnst_name, cnst_get_ind
     
     class (mySetup), intent(inout) :: this
@@ -149,6 +152,29 @@ contains
     
   end subroutine test_cnst_get_ind
 
+  @Test
+  subroutine test_modal_aero_wateruptake_dr()
+    use modal_aero_wateruptake
+    
+    ! load state
+          state%lchnk = lchnk
+          state%ncol = ncol
+          state%t = t
+          state%pmid = pmid
+          state%pdel = pdel
+          state%q = q
+    ! load ptend
+          ptend%lq = dotend
+          ptend%q = dqdt
+    ! load pbuf
+          call load_pbuf( &
+             ncol, nstop, deltat, t, pmid, pdel, zm, pblh, cld, relhum, qv, &
+             q, qqcw, dgncur_a, dgncur_awet, qaerwat, wetdens        )
+
+    ! call wateruptake
+          call modal_aero_wateruptake_dr( state, pbuf )
+          
+  end subroutine test_modal_aero_wateruptake_dr
 
 end module Test_MAM_box_mod
 
