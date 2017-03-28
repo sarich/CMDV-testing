@@ -62,6 +62,54 @@ program myTest
   real :: a = 1
   real :: b = 2
 
+  
+  integer :: tmp_int
+  character(60) :: tmp_string
+  
+  ! command line arguments
+  integer::narg,counterArg !#of arg & counter of arg
+  character(len=20)::name , program_name !Arg name
+  character(4) :: program_version = "1.0"
+  ! options
+  logical :: create_baseline = .False.
+  character(60) :: baselineFile = "myBaseline.tsv"
+  character(60) :: dataFile     = "myData.tsv"
+  
+
+  call getarg(0, program_name)
+  
+  !Check if any arguments are found
+  narg=command_argument_count()
+  write(*,*) "Found" , narg , "options"
+  
+  !Loop over the arguments
+   if(narg>0)then
+  !loop across options
+     counterArg=1
+     do while (counterArg <= narg)
+       ! cptArg=1,narg
+       call get_command_argument(counterArg,name)
+       select case(adjustl(name))
+        case("--help","-h")
+           write(*,*) "This is program", program_name , "(myTest) : Version " , program_version
+        case("--dump")
+            counterArg = counterArg + 1
+            if (counterArg<= narg) then
+              call getarg(counterArg , tmp_string)
+              if( len(tmp_string)>0) then 
+                read(tmp_string,*) baselineFile
+              end if  
+            end if  
+            write(*,*) "Creating  " , baselineFile
+            create_baseline = .True.
+            
+        case default
+         write(*,*)"Option ", adjustl(name) ,"unknown"
+       end select
+       counterArg = counterArg + 1
+     end do
+  end if
+  
   ! Set values
   
 
@@ -119,10 +167,17 @@ program myTest
     
     ! end my part     
          
-    write(*,'(/a)') '*** main dump data ***'
+    if (create_baseline) then
+      write(*,'(/a)') '*** main dump data ***'
+      call dump(ncol, nstop, deltat, t, pmid, pdel, zm, pblh, cld, relhum, qv, &
+           q, qqcw, dgncur_a, dgncur_awet, qaerwat, wetdens , pcnst, pver)
+    end if
+         
 
-    write(*,'(/a)') '*** main read data ***'
+    
     write(*,'(/a)') '*** main compare data ***'
+    
+    tmp = compare(dataFile , baselineFile)
 !      iulog = 93
  !     write(*,'(/a)') '*** main calling cambox_do_run'
  !      call cambox_do_run( &
@@ -130,14 +185,23 @@ program myTest
 !          q, qqcw, dgncur_a, dgncur_awet, qaerwat, wetdens        )
 
  
-  call myOut(a,b)       
+  
 
   write(*,'(/a)') '*** main dump ***'
-  call dump(ncol, nstop, deltat, t, pmid, pdel, zm, pblh, cld, relhum, qv, &
-         q, qqcw, dgncur_a, dgncur_awet, qaerwat, wetdens , pcnst, pver)
-  write(*,'(/a)') '*** main done ***'
+    write(*,'(/a)') '*** main done ***'
   
 contains 
+  
+  integer function compare(outfile , baseline)
+  implicit none
+  
+  character(60) , intent(in) :: outfile , baseline
+  
+  write(*,'(/a)') '*** main read data ***'
+  write(*,*) "Comparing " , outfile , baseline
+  ! file diff or compare variables ?
+  compare = 1
+  end function compare
   
   SUBROUTINE myOut(SUM,SUMSQ)
   REAL SUM, SUMSQ
