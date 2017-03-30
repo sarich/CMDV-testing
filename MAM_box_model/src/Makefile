@@ -114,7 +114,7 @@ OBJTEST = \
 	driver.o
 
 SUT : $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJTEST) $(CONFIGINFO)
-	$(FC)  $(FCFLAGS) $(LDFLAGS) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJTEST) $(LDLIBS)
+	$(FC) -c $(FCFLAGS) $(LDFLAGS) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJTEST) $(LDLIBS)
 	
 all: $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ9) $(CONFIGINFO)
 	$(FC) -o $(EXE) $(FCFLAGS) $(LDFLAGS) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ9) $(LDLIBS)
