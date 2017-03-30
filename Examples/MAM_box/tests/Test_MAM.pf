@@ -184,30 +184,31 @@ contains
 
 
     !-------------------------------------------------------------------------------
-          subroutine cambox_init_basics( ncol )
+    
+  subroutine cambox_init_basics( ncol )
 
-          use shr_kind_mod, only: r8 => shr_kind_r8
-          use abortutils, only: endrun
-          use cam_logfile, only: iulog
-          use chem_mods, only: adv_mass, gas_pcnst, imozart
-          use mo_tracname, only: solsym
-          use ppgrid, only: pcols, pver
-          use physics_buffer, only: physics_buffer_desc, pbuf_init
+  use shr_kind_mod, only: r8 => shr_kind_r8
+  use abortutils, only: endrun
+  use cam_logfile, only: iulog
+  use chem_mods, only: adv_mass, gas_pcnst, imozart
+  use mo_tracname, only: solsym
+  use ppgrid, only: pcols, pver
+  use physics_buffer, only: physics_buffer_desc, pbuf_init
 
-          use modal_aero_data, only: nbc, npoa, nsoa, nsoag
-          use modal_aero_initialize_data
-          use modal_aero_amicphys, only: mosaic
-          use modal_aero_calcsize, only: modal_aero_calcsize_reg
-          use modal_aero_wateruptake, only: modal_aero_wateruptake_reg, modal_aero_wateruptake_init
+  use modal_aero_data, only: nbc, npoa, nsoa, nsoag
+  use modal_aero_initialize_data
+  use modal_aero_amicphys, only: mosaic
+  use modal_aero_calcsize, only: modal_aero_calcsize_reg
+  use modal_aero_wateruptake, only: modal_aero_wateruptake_reg, modal_aero_wateruptake_init
 
-    !     implicit none
+  !     implicit none
 
-          integer, intent(in) :: ncol
+  integer, intent(in) :: ncol
 
-          integer :: l, l2
-          integer :: n
+  integer :: l, l2
+  integer :: n
 
-          type(physics_buffer_desc), pointer :: pbuf2d(:,:)
+  type(physics_buffer_desc), pointer :: pbuf2d(:,:)
 
     #if ( ( defined MODAL_AERO_7MODE ) && ( defined MOSAIC_SPECIES ) )
           n = 60
