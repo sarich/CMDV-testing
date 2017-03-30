@@ -108,6 +108,18 @@ OBJ9 = \
 	driver.o  \
 	main.o
 
+OBJTEST = \
+	gaschem_simple.o  \
+	cloudchem_simple.o  \
+	driver.o
+
+SUT : $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJTEST) $(CONFIGINFO)
+	$(FC)  $(FCFLAGS) $(LDFLAGS) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJTEST) $(LDLIBS)
+	
+all: $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ9) $(CONFIGINFO)
+	$(FC) -o $(EXE) $(FCFLAGS) $(LDFLAGS) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ9) $(LDLIBS)
+	
+
 #-----------------------------------------------------------------------------
 # WARNING: Don't touch anything below this line unless you exactly know it !!!
 #-----------------------------------------------------------------------------
@@ -116,6 +128,7 @@ OBJ9 = \
 #
 # Dependancies...
 #
+	
 $(EXE): $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ9) $(CONFIGINFO)
 	$(FC) -o $@ $(FCFLAGS) $(LDFLAGS) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ9) $(LDLIBS)
 

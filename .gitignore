@@ -2,7 +2,13 @@
 *.nc
 
 # Ignore compiled files
-*.o
+*.o 
+
+# Ignore mod files
+*.mod
+
+# Ignore fort* files from script
+fort.*
 
 # Ignore mod files
 *.mod
