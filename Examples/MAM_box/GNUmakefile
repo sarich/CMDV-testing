@@ -70,7 +70,7 @@ SUT:
 
 tests: all
 #$(EXE): testSuites.inc Test_MAM_box.pf Test_units units.F90 SUT
-$(EXE): testSuites.inc Test_MAM.pf  Test_units.pf  SUT
+$(EXE): testSuites.inc Test_MAM_box.pf  Test_units.pf  SUT
 	echo $(FC) -o $@ -I$(PFUNIT)/mod -I$(PFUNIT)/include -Itests $(PFUNIT)/include/driver.F90 $(TEST_DIR)/*$(OBJ_EXT) $(SRC_DIR)/*$(OBJ_EXT) $(LIBS) $(FFLAGS) $(FPPFLAGS)
 	$(FC) -o $@ -I$(PFUNIT)/mod -I$(PFUNIT)/include -Itests $(PFUNIT)/include/driver.F90 $(TEST_DIR)/*$(OBJ_EXT) $(SRC_DIR)/*$(OBJ_EXT) $(LIBS) $(FFLAGS) $(FPPFLAGS)
 
