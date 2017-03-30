@@ -42,5 +42,243 @@ gfortran: warning: modal_aero_initialize_data.o: linker input file unused becaus
 gfortran: warning: gaschem_simple.o: linker input file unused because linking not done
 gfortran: warning: cloudchem_simple.o: linker input file unused because linking not done
 gfortran: warning: driver.o: linker input file unused because linking not done
-ERROR STOP *** Encountered 1 or more failures/errors during testing. ***
-make: *** [all] Error 1
+Test_MAM.F90:212:5:
+
+   use modal_aero_calcsize, only: modal_aero_calcsize_reg
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:214:5: Error: Invalid character in name at (1)
+Test_MAM.F90:216:5: Error: Invalid character in name at (1)
+Test_MAM.F90:218:5: Error: Invalid character in name at (1)
+Test_MAM.F90:220:5:
+
+   integer :: n
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:222:5:
+
+   type(physics_buffer_desc), pointer :: pbuf2d(:,:)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:224:5:
+
+     #if ( ( defined MODAL_AERO_7MODE ) && ( defined MOSAIC_SPECIES ) )
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:235:5:
+
+           call endrun( 'MODAL_AERO_3/4/4MOM/7MODE are all undefined' )
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:238:5:
+
+           l = n - (imozart-1)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:281:5:
+
+              135.064041_r8, 96.0635986_r8, 18.0363407_r8, 62.0049400_r8, 35.4527000_r8, &
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:301:5:
+
+              'so4_a6  ','nh4_a6  ','num_a6  ','dst_a7  ','so4_a7  ', &
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:333:5:
+
+              12.0109997_r8, 96.0635986_r8, 18.0363407_r8, 12.0109997_r8, 12.0109997_r8, 12.0109997_r8, &
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:335:5:
+
+              12.0109997_r8, 58.4424667_r8, 1.00740004_r8, 12.0109997_r8,12.0109997_r8,  12.0109997_r8, 12.0109997_r8, &
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:350:5:
+
+              'so4_a1        ', 'pom_a1        ', 'soa_a1        ', 'bc_a1         ', 'dst_a1        ', &
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:365:5:
+
+              'SOAG    ', 'so4_a1  ',             'pom_a1  ', 'soa_a1  ', &
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:371:5:
+
+           (/ 34.0135994_r8, 98.0783997_r8, 64.0647964_r8, 62.1324005_r8,                &
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:392:5:
+
+              'pom_a4  ', 'bc_a4   ', 'num_a4  ' /)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:413:5:
+
+              'dst_a3  ', 'ncl_a3  ', 'so4_a3  ', 'num_a3  ' /)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:792:5:
+
+     ! set accum mode number and masses
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:797:5:
+
+           l_soaa = lptr_soa_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:802:5:
+
+           l_ncla = lptr_nacl_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:907:5:
+
+     ! set aitken mode number and masses
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:912:5:
+
+           l_soaa = lptr_soa_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:917:5:
+
+           l_ncla = lptr_nacl_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1014:5: Error: Invalid character in name at (1)
+Test_MAM.F90:1019:5:
+
+           l_soaa = lptr_soa_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1024:5:
+
+           l_ncla = lptr_nacl_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1083:5: Error: Invalid character in name at (1)
+Test_MAM.F90:1088:5:
+
+           l_soaa = lptr_soa_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1093:5:
+
+           l_ncla = lptr_nacl_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1162:5:
+
+           cycle
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1167:5:
+
+           l_soaa = lptr_soa_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1172:5:
+
+           l_ncla = lptr_nacl_a_amode(n)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:2201:5:
+
+                 tmpveca( 2) = tmpveca( 2) + vmr(     i,k,l) + vmrcw(     i,k,l)
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:2212:5:
+
+              end if
+     1
+Error: Invalid character in name at (1)
+Test_MAM.F90:1580:23: Error: Symbol 'testing' at (1) has no IMPLICIT type
+Test_MAM.F90:2207:17:
+
+              end if
+                 1
+Error: Function 'lptr_cl_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:794:19:
+
+           l_numa = numptr_amode(n)
+                   1
+Error: Function 'lptr_cl_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:795:19:
+
+           l_so4a = lptr_so4_a_amode(n)
+                   1
+Error: Function 'lptr_ca_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:796:19:
+
+           l_nh4a = lptr_nh4_a_amode(n)
+                   1
+Error: Function 'lptr_co3_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:909:19:
+
+           l_numa = numptr_amode(n)
+                   1
+Error: Function 'lptr_cl_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:910:19:
+
+           l_so4a = lptr_so4_a_amode(n)
+                   1
+Error: Function 'lptr_ca_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:911:19:
+
+           l_nh4a = lptr_nh4_a_amode(n)
+                   1
+Error: Function 'lptr_co3_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1016:19:
+
+           l_numa = numptr_amode(n)
+                   1
+Error: Function 'lptr_cl_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1017:19:
+
+           l_so4a = lptr_so4_a_amode(n)
+                   1
+Error: Function 'lptr_ca_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1018:19:
+
+           l_nh4a = lptr_nh4_a_amode(n)
+                   1
+Error: Function 'lptr_co3_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1085:19:
+
+           l_numa = numptr_amode(n)
+                   1
+Error: Function 'lptr_cl_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1086:19:
+
+           l_so4a = lptr_so4_a_amode(n)
+                   1
+Error: Function 'lptr_ca_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1087:19:
+
+           l_nh4a = lptr_nh4_a_amode(n)
+                   1
+Error: Function 'lptr_co3_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1164:19:
+
+           l_numa = numptr_amode(n)
+                   1
+Error: Function 'lptr_cl_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1165:19:
+
+           l_so4a = lptr_so4_a_amode(n)
+                   1
+Error: Function 'lptr_ca_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:1166:19:
+
+           l_nh4a = lptr_nh4_a_amode(n)
+                   1
+Error: Function 'lptr_co3_a_amode' at (1) has no IMPLICIT type
+Test_MAM.F90:2480:7: Fatal Error: Can't open module file 'test_mam_box.mod' for reading at (1): No such file or directory
+compilation terminated.
+make[1]: *** [Test_MAM.o] Error 1
+make: *** [SUT] Error 2
