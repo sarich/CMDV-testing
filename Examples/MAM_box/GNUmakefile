@@ -1,6 +1,7 @@
 .PHONY: tests clean all
 .DEFAULT_GOAL = tests
 
+
 # Determine operating system, architecture and compiler
 # automatically if possible
 UNAME ?=$(shell uname)
