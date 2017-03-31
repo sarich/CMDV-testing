@@ -6,6 +6,8 @@ module Test_MAM_box
    use shr_kind_mod, only: r8 => shr_kind_r8
    use constituents, only: pcnst, cnst_name, cnst_get_ind
    use modal_aero_data, only: ntot_amode
+   ! For TestCase
+   use ppgrid,                  only: pcols, pver
 
    implicit none
 
@@ -45,6 +47,27 @@ module Test_MAM_box
      character(len=20) :: name_to_find
      character(len=20) , dimension(5):: list_of_names
      integer :: name_id
+     
+     ! 
+     integer  :: ncol
+     integer  :: nstop
+     real(r8) :: deltat
+     real(r8) :: t(pcols,pver)      ! Temperature in Kelvin
+     real(r8) :: pmid(pcols,pver)   ! pressure at model levels (Pa)
+     real(r8) :: pdel(pcols,pver)   ! pressure thickness of levels
+     real(r8) :: zm(pcols,pver)     ! midpoint height above surface (m)
+     real(r8) :: pblh(pcols)        ! pbl height (m)
+     real(r8) :: cld(pcols,pver)    ! stratiform cloud fraction
+     real(r8) :: relhum(pcols,pver) ! layer relative humidity
+     real(r8) :: qv(pcols,pver)     ! layer specific humidity
+     real(r8) :: q(pcols,pver,pcnst)     ! Tracer MR array
+     real(r8) :: qqcw(pcols,pver,pcnst)  ! Cloudborne aerosol MR array
+     real(r8) :: dgncur_a(pcols,pver,ntot_amode)
+     real(r8) :: dgncur_awet(pcols,pver,ntot_amode)
+     real(r8) :: qaerwat(pcols,pver,ntot_amode)
+     real(r8) :: wetdens(pcols,pver,ntot_amode)
+
+
    
    contains
        procedure :: setUp     ! overides generic
@@ -56,10 +79,84 @@ contains
 
    ! No need to annotate setUp() when _extending_ TestCase
   subroutine setUp(this)
-      class (mySetup), intent(inout) :: this
+    
+    ! init
+    ! use shr_kind_mod,            only: r8 => shr_kind_r8
+    use abortutils,              only: endrun
+    use cam_history,             only: ncol_for_outfld
+    use cam_logfile,             only: iulog
+    use ppgrid,                  only: pcols, pver
+    use wv_saturation,           only: ncol_for_qsat
+    use modal_aero_data,         only: ntot_amode
 
-      this%value = 6
-      print * , "Setup in TestCase"
+!     implicit none
+
+    class (mySetup), intent(inout) :: this
+
+
+    integer, parameter :: ncolxx = min( pcols, 10 )
+    integer  :: ncol
+    integer  :: nstop
+
+    real(r8) :: deltat
+    real(r8) :: t(pcols,pver)      ! Temperature in Kelvin
+    real(r8) :: pmid(pcols,pver)   ! pressure at model levels (Pa)
+    real(r8) :: pdel(pcols,pver)   ! pressure thickness of levels
+    real(r8) :: zm(pcols,pver)     ! midpoint height above surface (m)
+    real(r8) :: pblh(pcols)        ! pbl height (m)
+    real(r8) :: relhum(pcols,pver) ! layer relative humidity
+    real(r8) :: qv(pcols,pver)     ! layer specific humidity
+    real(r8) :: cld(pcols,pver)    ! stratiform cloud fraction
+
+    real(r8) :: q(pcols,pver,pcnst)     ! Tracer MR array
+    real(r8) :: qqcw(pcols,pver,pcnst)  ! Cloudborne aerosol MR array
+    real(r8) :: dgncur_a(pcols,pver,ntot_amode)
+    real(r8) :: dgncur_awet(pcols,pver,ntot_amode)
+    real(r8) :: qaerwat(pcols,pver,ntot_amode)
+    real(r8) :: wetdens(pcols,pver,ntot_amode)
+
+    ncol = ncolxx
+    ncol_for_outfld = ncol
+    ncol_for_qsat = ncol
+
+    write(lun_outfld,'(/a,i5)') 'istep = ', -1
+
+    iulog = 91
+    write(*,'(/a)') '*** Setup ***'
+    write(*,'(/a)') '*** Calling cambox_init_basics ***'
+    call cambox_init_basics( ncol )
+
+    iulog = 92
+    write(*,'(/a)') '*** Calling cambox_init_run'
+    print * , "Setup"
+    call cambox_init_run( &
+       ncol, nstop, deltat, t, pmid, pdel, zm, pblh, cld, relhum, qv, &
+       q, qqcw, dgncur_a, dgncur_awet, qaerwat, wetdens        )
+    
+   
+   
+       ! set values in this
+
+    this%value = 6
+    this%ncol = ncol
+    this%nstop = nstop
+    this%deltat = deltat
+    this%t = t 
+    this%pmid = pmid
+    this%pdel = pdel
+    this%zm = zm
+    this%pblh = pblh
+    this%cld = cld
+    this%relhum = relhum
+    this%qv = qv
+    this%q = q
+    this%qqcw = qqcw
+    this%dgncur_a = dgncur_a
+    this%dgncur_awet = dgncur_awet
+    this%qaerwat = qaerwat
+    this%wetdens = wetdens
+    
+    print * , "Setup in TestCase"
 
   end subroutine setUp
 
@@ -147,7 +244,7 @@ contains
     @assertEqual(iulog , 91 , message="Testing output channel.")
 
     write(*,'(/a)') '*** main calling cambox_init_basics'
-    @assertEqual(ncol , 91 , message="Testing dimension.")
+    @assertEqual(ncol , 10 , message="Testing dimension.")
     call cambox_init_basics( ncol )
 
     iulog = 92
@@ -193,9 +290,6 @@ contains
 
     type(physics_buffer_desc), pointer :: pbuf2d(:,:)
 
-    ! How to insert assert statements not in a test routine
-    ! @assertEqual(ncol , 91 , message="Testing output channel.")
-    write(*,*) "After Test"
 
 #if ( ( defined MODAL_AERO_7MODE ) && ( defined MOSAIC_SPECIES ) )
     n = 60
@@ -208,7 +302,8 @@ contains
 #elif ( defined MODAL_AERO_3MODE ) 
     n = 25
 #else
-    call endrun( 'MODAL_AERO_3/4/4MOM/7MODE are all undefined' )
+    n = 28  
+!     call endrun( 'MODAL_AERO_3/4/4MOM/7MODE are all undefined' )
 #endif
     n = n + 2*(nbc-1) + 2*(npoa-1) + 2*(nsoa-1)
     l = n - (imozart-1)
@@ -427,7 +522,9 @@ contains
 
     write(*,'(/a)') 'cambox_init_basics calling pbuf_init'
     call pbuf_init( )
-
+    
+    write(*,*) 'Species Class:' , species_class
+    
     write(*,'(/a)') 'cambox_init_basics calling modal_aero_register'
     call modal_aero_register( species_class )
 
