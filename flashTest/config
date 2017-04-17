@@ -51,12 +51,15 @@
 #pathToViewArchive:
 #pathToLocalArchive:
 
-site:	docker
+# set site - if set this determines the section in test.info to be run
+# otherwise hostname will be used
+site:	docker 
+
 ###############################
 ##  FLASH-specific keywords  ##
 ###############################
 
-pathToFlash:        /application
+pathToFlash:        /cmdv/Examples/
 defaultParfile:     <pathToFlash>/object/flash.par
 updateScript:
 pathToSimulations:  <pathToFlash>/source/Simulation/SimulationMain
