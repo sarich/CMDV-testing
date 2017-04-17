@@ -77,7 +77,9 @@ contains
     call cambox_do_run( &
          ncol, nstop, deltat, t, pmid, pdel, zm, pblh, cld, relhum, qv, &
          q, qqcw, dgncur_a, dgncur_awet, qaerwat, wetdens, success        )
-    if(success)print*,'the test passed'
+    if(TESTING==1) then
+       if(success)print*,'the test passed'
+    end if
   end subroutine cambox_main
   
   !-------------------------------------------------------------------------------
@@ -334,7 +336,7 @@ contains
        write(lun,'(a,i7)') 'calcsize tend = 0 for all species'
     end if
     
-    open(tempunit,file="test5")
+    open(tempunit,file="test4Res")
     
     do i = 1, ncol
        lun = tempunit + i
@@ -576,6 +578,27 @@ contains
                   vmr_svbb(i,k,lmz_h2so4g)*1.0e9,   vmr(i,k,lmz_h2so4g)*1.0e9, &
                   vmrcw_svbb(i,k,lmz_so4_a1)*1.0e9, vmrcw(i,k,lmz_so4_a1)*1.0e9, &
                   vmrcw_svbb(i,k,lmz_so4_a2)*1.0e9, vmrcw(i,k,lmz_so4_a2)*1.0e9
+             if(TESTING==0) then 
+                write(tempunit,*)vmr_svbb(i,k,lmz_so2g), vmr(i,k,lmz_so2g), &
+                     vmr_svbb(i,k,lmz_h2so4g), vmr(i,k,lmz_h2so4g), &
+                     vmrcw_svbb(i,k,lmz_so4_a1),&
+                     vmrcw(i,k,lmz_so4_a1), &
+                     vmrcw_svbb(i,k,lmz_so4_a2), vmrcw(i,k,lmz_so4_a2)
+             else
+                read(tempunit,*)scr(1),scr(2),scr(3),scr(4),scr(5),scr(6),scr(7),scr(8)
+                match=.true.
+                match = match.and.(abs(vmr_svbb(i,k,lmz_so2g)-scr(1))<tol)
+                match = match.and.(abs(vmr(i,k,lmz_so2g)-scr(2))<tol)
+                match = match.and.(abs(vmr_svbb(i,k,lmz_h2so4g)-scr(3))<tol)
+                match = match.and.(abs(vmr(i,k,lmz_h2so4g)-scr(4))<tol)
+                match = match.and.(abs(vmrcw_svbb(i,k,lmz_so4_a1)-scr(5))<tol)
+                match = match.and.(abs(vmrcw(i,k,lmz_so4_a1)-scr(6))<tol)
+                match = match.and.(abs(vmrcw_svbb(i,k,lmz_so4_a2)-scr(7))<tol)
+                match = match.and.(abs(vmrcw(i,k,lmz_so4_a2)-scr(8))<tol)
+                
+                if(.not.match)success = .false.
+             end if
+             
           end do
           if (lmz_nh3g > 0) then
              write(lun,'(2a)') &
@@ -594,348 +617,348 @@ contains
        
     end if ! (mdo_cloudchem > 0 .and. maxval( cld_ncol(:,:) ) > 1.0e-6_r8) then
     
-    
-    !
-    ! gasaerexch
-    !
-    lun = 6
-    write(lun,'(/a,i8)') 'cambox_do_run doing gasaerexch, istep=', istep
-    vmr_svcc = vmr
-    vmrcw_svcc = vmrcw
-    
-    dvmrdt_bb = 0.0_r8 ; dvmrcwdt_bb = 0.0_r8
-    
-    
-    !.....tine modal_aero_amicphys_intr(              &
-    !        mdo_gasaerexch,     mdo_rename,          &
-    !        mdo_newnuc,         mdo_coag,            &
-    !        lchnk,    ncol,     nstep,               &
-    !        loffset,  deltat,                        &
-    !        latndx,   lonndx,                        &
-    !        t,        pmid,     pdel,                &
-    !        zm,       pblh,                          &
-    !        qv,       cld,                           &
-    !        q,                  qqcw,                &
-    !        q_pregaschem,                            &
-    !        q_precldchem,       qqcw_precldchem,     &
-    !#if ( defined( CAMBOX_ACTIVATE_THIS ) )
-    !        nqtendbb,           nqqcwtendbb,         &
-    !        q_tendbb,           qqcw_tendbb,         &
-    !#endif
-    !        dgncur_a,           dgncur_awet,         &
-    !        wetdens,                                 &
-    !        qaerwat                                  )
-    
-    call modal_aero_amicphys_intr(              &
-         mdo_gasaerexch,     mdo_rename,          &
-         mdo_newnuc,         mdo_coag,            &
-         lchnk,    ncol,     nstep,               &
-         loffset,  deltat,                        &
-         latndx,   lonndx,                        &
-         t,        pmid,     pdel,                &
-         zm,       pblh,                          &
-         qv,       cld_ncol,                      &
-         vmr,                vmrcw,               &   ! after  cloud chem
-         vmr_svaa,                                &   ! before gas chem
-         vmr_svbb,           vmrcw_svbb,          &   ! before cloud chem
-         nqtendbb,           nqqcwtendbb,         &
-         dvmrdt_bb,          dvmrcwdt_bb,         &
-         dgncur_a,           dgncur_awet,         &
-         wetdens                                  )
-    
-    
-    
-    dvmrdt_cond(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_cond)
-    dvmrdt_rnam(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_rnam)
-    dvmrdt_nnuc(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_nnuc)
-    dvmrdt_coag(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_coag)
-    dvmrcwdt_cond(:,:,:) = 0.0_r8
-    dvmrcwdt_rnam(:,:,:) = dvmrcwdt_bb(:,:,:,iqqcwtend_rnam)
-    dvmrcwdt_nnuc(:,:,:) = 0.0_r8
-    dvmrcwdt_coag(:,:,:) = 0.0_r8
-    
-    
-    lun = 6
-    do i = 1, ncol
-       lun = tempunit + i
-       write(lun,'(/a,i8)') 'cambox_do_run doing gasaerexch, istep=', istep
-       if (iwrite3x_units_flagaa >= 10) then
-          tmpch80 = '  (nmol/mol)'
-       else
-          tmpch80 = '  (ppbv)'
-       end if
-       write(lun,'( 2a)') &
-            'k, old & new h2so4, old & new so4_a1, old & new so4_a2', &
-            trim(tmpch80)
-       do k = 1, pver
-          write(lun,'( i4,1p,6(2x,2e12.4))') k, &
-               vmr_svcc(i,k,lmz_h2so4g)*1.0e9, vmr(i,k,lmz_h2so4g)*1.0e9, &
-               vmr_svcc(i,k,lmz_so4_a1)*1.0e9, vmr(i,k,lmz_so4_a1)*1.0e9, &
-               vmr_svcc(i,k,lmz_so4_a2)*1.0e9, vmr(i,k,lmz_so4_a2)*1.0e9
-          if(TESTING==0)then
-             write(tempunit,*)&
-                  vmr_svcc(i,k,lmz_h2so4g), vmr(i,k,lmz_h2so4g), &
-                  vmr_svcc(i,k,lmz_so4_a1), vmr(i,k,lmz_so4_a1), &
-                  vmr_svcc(i,k,lmz_so4_a2), vmr(i,k,lmz_so4_a2)
-          else
-             read(tempunit,*)scr(1),scr(2),scr(3),scr(4),scr(5),scr(6)
-             if(.not.((vmr_svcc(i,k,lmz_h2so4g)==scr(1)).and.&
-                  (vmr(i,k,lmz_h2so4g)==scr(2)).and.&
-                  (vmr_svcc(i,k,lmz_so4_a1)==scr(3)).and.&
-                  (vmr(i,k,lmz_so4_a1)==scr(4)).and.&
-                  (vmr_svcc(i,k,lmz_so4_a2)==scr(5)).and.&
-                  (vmr(i,k,lmz_so4_a2)==scr(6))))success=.false.
-          end if
-       end do
-    end do ! i
-    
-    
-    i = 1 ; k = pver ; lun = 82
-    tmpveca = 0.0_r8
-    tmpveca(101) = vmr_svcc(i,k,lmz_h2so4g)
-    tmpveca(201) = vmr(i,k,lmz_h2so4g)
-    do n = 1, ntot_amode
-       l = lptr_so4_a_amode(n) - loffset
-       if (l > 0) tmpveca(110+n) = vmr_svcc(i,k,l)
-       if (l > 0) tmpveca(210+n) = vmr(i,k,l)
-    end do
-    tmpveca(102) = sum( tmpveca(111:118) )
-    tmpveca(103) = sum( tmpveca(101:102) )
-    tmpveca(202) = sum( tmpveca(211:218) )
-    tmpveca(203) = sum( tmpveca(201:202) )
-    tmpveca = tmpveca*1.0e9_r8
-    write(lun,'(/a,2i5)') 'h2so4g, so4a_tot, sum at i,k =', i, k
-    write(lun,'(/a,1p,3e20.10,10e10.2)') 'before gasaerexch', tmpveca(101:103)
-    write(lun,'(/a,1p,3e20.10,10e10.2)') 'after  gasaerexch', tmpveca(201:203)
-    write(lun,'(/a,2i5)') 'so4a_1-8 at i,k =', i, k
-    write(lun,'(/a,1p,3e20.10,10e10.2)') 'before gasaerexch', tmpveca(111:118)
-    write(lun,'(/a,1p,3e20.10,10e10.2)') 'after  gasaerexch', tmpveca(211:218)
-    
-    call dump4x( 'gaex ', ncol, nstep, vmr_svcc, vmrcw_svcc, vmr, vmrcw )
-    
-    
-    !
-    ! newnuc
-    !
-    if ( 1 == 0 ) then
-       !     deleted all of this
-    end if ! ( 1 == 0 )
-    
-    
-    !
-    ! coag
-    !
-    if ( 1 == 0 ) then
-       !     deleted all of this
-    end if ! ( 1 == 0 )
-    
-    
-    !
-    ! done
-    !
-    lun = 6
-    write(lun,'(/a,i8)') 'cambox_do_run step done, istep=', istep
-    
-    do i = 1, ncol
-       lun = tempunit + i
-       write(lun,'(/a,i8)') 'cambox_do_run step done, istep=', istep
-       
-       do k = 1, pver
-          
-          if (iwrite3x_units_flagaa >= 10) then
-             tmpch80 = '   --   units = nmol/mol & #/mg'
-          else
-             tmpch80 = ' '
-          end if
-          write(lun,'(/a,2i5,2f10.3,a)') 'i, k, told, tnew (h)', i, k, &
-               told/3600.0_r8, tnew/3600.0_r8, trim(tmpch80)
-          write(lun,'(2a)') &
-               'spec              qold       qnew         del-gas', &
-               '   del-cloud del-rena    del-cond  del-nuc   del-coag'
-          do l = 1, gas_pcnst
-             if (iwrite3x_species_flagaa < 10) then
-                !           if (max( vmr_svaa(i,k,l), vmr(i,k,l) ) < 1.0e-35) cycle
-                if (max( vmr_svaa(i,k,l), vmr_svbb(i,k,l), &
-                     vmr_svcc(i,k,l), vmr(i,k,l) ) < 1.0e-35) cycle
-             end if
-             tmpb = adv_mass(l)
-             if (abs(tmpb-1.0_r8) <= 0.1_r8) then
-                tmpa = 1.0e-6 * tmpb/mwdry
-             else
-                tmpa = 1.0e9
-             end if
-             tmpveca(:) = 0.0
-             tmpveca(1) = vmr_svaa(i,k,l)
-             tmpveca(2) = vmr(     i,k,l)
-             tmpveca(3) = vmr_svbb(i,k,l) - vmr_svaa(i,k,l)  ! gaschem
-             tmpveca(4) = vmr_svcc(i,k,l) - vmr_svbb(i,k,l)  ! cloudchem
-             
-             !        tmpveca(5) = dvmrdt_rename(i,k,l)*deltat        ! gasaerexch rename
-             !        tmpveca(6) = vmr_svdd(i,k,l) - vmr_svcc(i,k,l)  ! gasaerexch conden+rename
-             tmpveca(5) = dvmrdt_rnam(i,k,l)*deltat          ! gasaerexch rename
-             tmpveca(6) = dvmrdt_cond(i,k,l)*deltat          ! gasaerexch conden
-             tmpveca(7) = dvmrdt_nnuc(i,k,l)*deltat          ! gasaerexch newnuc
-             tmpveca(8) = dvmrdt_coag(i,k,l)*deltat          ! gasaerexch coagul
-             ! following commented out lines were for old gasaerexch, where you started with 
-             ! tmpveca(6) = vmr_svdd(i,k,l) - vmr_svcc(i,k,l)  ! gasaerexch conden+rename
-             !        tmpb = tmpveca(6)
-             !        tmpveca(6) = tmpveca(6) - tmpveca(5)
-             !        tmpc = max( abs(tmpveca(5)), abs(tmpb),1.0e-20_r8 )
-             !        if (abs(tmpveca(6)) < 1.0e-10*tmpc) tmpveca(6) = 0.0_r8
-             
-             !        tmpveca(7) = vmr_svee(i,k,l) - vmr_svdd(i,k,l)  ! newnuc
-             !        tmpveca(8) = vmr(     i,k,l) - vmr_svee(i,k,l)  ! coag
-             write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') &
-                  cnst_name(l+loffset), tmpveca(1:8)*tmpa
-          end do ! l
-          
-          do l = 1, gas_pcnst
-             if (max( vmrcw_svaa(i,k,l), vmrcw(i,k,l) ) < 1.0e-35) cycle
-             tmpb = adv_mass(l)
-             if (abs(tmpb-1.0_r8) <= 0.1_r8) then
-                tmpa = 1.0e-6 * tmpb/mwdry
-             else
-                tmpa = 1.0e9
-             end if
-             tmpveca(:) = 0.0
-             tmpveca(1) = vmrcw_svaa(i,k,l)
-             tmpveca(2) = vmrcw(     i,k,l)
-             tmpveca(3) = vmrcw_svbb(i,k,l) - vmrcw_svaa(i,k,l)  ! gaschem
-             tmpveca(4) = vmrcw_svcc(i,k,l) - vmrcw_svbb(i,k,l)  ! cloudchem
-             
-             !        tmpveca(5) = dvmrcwdt_rename(i,k,l)*deltat        ! gasaerexch rename
-             !        tmpveca(6) = vmrcw_svdd(i,k,l) - vmrcw_svcc(i,k,l)  ! gasaerexch conden+rename
-             tmpveca(5) = dvmrcwdt_rnam(i,k,l)*deltat          ! gasaerexch rename
-             tmpveca(6) = dvmrcwdt_cond(i,k,l)*deltat          ! gasaerexch conden
-             tmpveca(7) = dvmrcwdt_nnuc(i,k,l)*deltat          ! gasaerexch newnuc
-             tmpveca(8) = dvmrcwdt_coag(i,k,l)*deltat          ! gasaerexch coagul
-             ! following commented out lines were for old gasaerexch, where you started with 
-             ! tmpveca(6) = vmrcw_svdd(i,k,l) - vmrcw_svcc(i,k,l)  ! gasaerexch conden+rename
-             !        tmpb = tmpveca(6)
-             !        tmpveca(6) = tmpveca(6) - tmpveca(5)
-             !        tmpc = max( abs(tmpveca(5)), abs(tmpb),1.0e-20_r8 )
-             !        if (abs(tmpveca(6)) < 1.0e-10*tmpc) tmpveca(6) = 0.0_r8
-             
-             !        tmpveca(7) = vmrcw_svee(i,k,l) - vmrcw_svdd(i,k,l)  ! newnuc
-             !        tmpveca(8) = vmrcw(     i,k,l) - vmrcw_svee(i,k,l)  ! coag
-             tmpveca(9) = tmpveca(2) - tmpveca(1)
-             write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,5e10.2)') &
-                  cnst_name_cw(l+loffset)(1:16), tmpveca(1:8)*tmpa
-          end do ! l
-          
-          tmpveca(:) = 0.0
-          tmpveca( 1) = vmr_svaa(i,k,lmz_so2g) + vmr_svaa(i,k,lmz_h2so4g)
-          tmpveca( 2) = vmr(     i,k,lmz_so2g) + vmr(     i,k,lmz_h2so4g)
-          if (lmz_nh3g > 0) then
-             tmpveca(11) = vmr_svaa(i,k,lmz_nh3g)
-             tmpveca(12) = vmr(     i,k,lmz_nh3g)
-          end if
-          l = lptr2_soa_g_amode(1) - loffset
-          tmpveca(21) = vmr_svaa(i,k,l)
-          tmpveca(22) = vmr(     i,k,l)
-          if (lmz_hno3g > 0) then
-             tmpveca(31) = vmr_svaa(i,k,lmz_hno3g)
-             tmpveca(32) = vmr(     i,k,lmz_hno3g)
-          end if
-          if (lmz_hclg > 0) then
-             tmpveca(41) = vmr_svaa(i,k,lmz_hclg)
-             tmpveca(42) = vmr(     i,k,lmz_hclg)
-          end if
-          do n = 1, ntot_amode
-             l = lptr_so4_a_amode(n) - loffset
-             if (l > 0) then
-                tmpveca( 1) = tmpveca( 1) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
-                tmpveca( 2) = tmpveca( 2) + vmr(     i,k,l) + vmrcw(     i,k,l)
-             end if
-             l = lptr_nh4_a_amode(n) - loffset
-             if (l > 0) then
-                tmpveca(11) = tmpveca(11) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
-                tmpveca(12) = tmpveca(12) + vmr(     i,k,l) + vmrcw(     i,k,l)
-             end if
-             l = lptr2_soa_a_amode(n,1) - loffset
-             if (l > 0) then
-                tmpveca(21) = tmpveca(21) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
-                tmpveca(22) = tmpveca(22) + vmr(     i,k,l) + vmrcw(     i,k,l)
-             end if
-#if ( defined MOSAIC_SPECIES )
-             l = lptr_no3_a_amode(n) - loffset
-             if (l > 0) then
-                tmpveca(31) = tmpveca(31) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
-                tmpveca(32) = tmpveca(32) + vmr(     i,k,l) + vmrcw(     i,k,l)
-             end if
-             l = lptr_cl_a_amode(n) - loffset
-             if (l > 0) then
-                tmpveca(41) = tmpveca(41) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
-                tmpveca(42) = tmpveca(42) + vmr(     i,k,l) + vmrcw(     i,k,l)
-             end if
-#endif
-          end do
-          tmpveca( 3) = tmpveca( 2) - tmpveca( 1)
-          tmpveca(13) = tmpveca(12) - tmpveca(11)
-          tmpveca(23) = tmpveca(22) - tmpveca(21)
-          tmpveca(33) = tmpveca(32) - tmpveca(31)
-          tmpveca(43) = tmpveca(42) - tmpveca(41)
-          tmpa = 1.0e9
-          write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'sox_tot         ', &
-               tmpveca(1:3)*tmpa
-          write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'nhx_tot         ', &
-               tmpveca(11:13)*tmpa
-          if (maxval( tmpveca(21:23) )*tmpa > 1.0e-10) &
-               write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'soa1_tot        ', &
-               tmpveca(21:23)*tmpa
-          if (maxval( tmpveca(31:33) )*tmpa > 1.0e-10) &
-               write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'no3_tot         ', &
-               tmpveca(31:33)*tmpa
-          if (maxval( tmpveca(41:43) )*tmpa > 1.0e-10) &
-               write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'cl_tot          ', &
-               tmpveca(41:43)*tmpa
-          
-          !     l = lmz_h2so4g
-          !     if (i == 1) then
-          !     write(81,'(/a,10x,2i5,1p,4e12.4,2x,4e12.4)') &
-          !        'main - i, k, q0, q1, q2, q3, d01, d23', i, k, &
-          !        vmr_svaa(i,k,l), vmr_svbb(i,k,l), &
-          !        vmr_svcc(i,k,l), vmr_svdd(i,k,l), &
-          !        vmr_svbb(i,k,l)-vmr_svaa(i,k,l), &
-          !        vmr_svdd(i,k,l)-vmr_svbb(i,k,l)
-          !     write(81,'(/a,10x,2i5,1p,4e12.4,2x,4e12.4)') &
-          !        'main - i, k, qavg, uptkrt            ', i, k, &
-          !        qavg_h2so4_gaex(i,k), uptkrt_h2so4_gaex(i,k)
-          !     end if
-          
-       end do ! k
-       
-    end do ! i
-    
-    
-    !
-    ! switch from vmr & vmrcw to q & qqcw
-    !
-    loffset = imozart - 1
-    do l = imozart, pcnst
-       l2 = l - loffset
-       mmr(  1:ncol,1:pver,l2) = vmr(  1:ncol,1:pver,l2) * adv_mass(l2)/mwdry
-       mmrcw(1:ncol,1:pver,l2) = vmrcw(1:ncol,1:pver,l2) * adv_mass(l2)/mwdry
-       q(    1:ncol,1:pver,l)  = mmr(  1:ncol,1:pver,l2)
-       qqcw( 1:ncol,1:pver,l)  = mmrcw(1:ncol,1:pver,l2)
-    end do
-    
-    
-    ! write binary file
-    lun = 181
-    write(lun) istep, ncol, pver, gas_pcnst, ntot_amode
-    do i = 1, ncol
-       do k = 1, pver
-          write(lun) i, k
-          write(lun) t(i,k), pmid(i,k), qv(i,k), relhum(i,k), cld(i,k), pblh(i)
-          write(lun) qaerwat(i,k,1:ntot_amode)
-          write(lun) dgncur_a(i,k,1:ntot_amode)
-          write(lun) dgncur_awet(i,k,1:ntot_amode)
-          do l = 1, gas_pcnst
-             write(lun) vmr(i,k,l), vmrcw(i,k,l)
-          end do ! l
-       end do ! k
-    end do ! i
+!!$    
+!!$    !
+!!$    ! gasaerexch
+!!$    !
+!!$    lun = 6
+!!$    write(lun,'(/a,i8)') 'cambox_do_run doing gasaerexch, istep=', istep
+!!$    vmr_svcc = vmr
+!!$    vmrcw_svcc = vmrcw
+!!$    
+!!$    dvmrdt_bb = 0.0_r8 ; dvmrcwdt_bb = 0.0_r8
+!!$    
+!!$    
+!!$    !.....tine modal_aero_amicphys_intr(              &
+!!$    !        mdo_gasaerexch,     mdo_rename,          &
+!!$    !        mdo_newnuc,         mdo_coag,            &
+!!$    !        lchnk,    ncol,     nstep,               &
+!!$    !        loffset,  deltat,                        &
+!!$    !        latndx,   lonndx,                        &
+!!$    !        t,        pmid,     pdel,                &
+!!$    !        zm,       pblh,                          &
+!!$    !        qv,       cld,                           &
+!!$    !        q,                  qqcw,                &
+!!$    !        q_pregaschem,                            &
+!!$    !        q_precldchem,       qqcw_precldchem,     &
+!!$    !#if ( defined( CAMBOX_ACTIVATE_THIS ) )
+!!$    !        nqtendbb,           nqqcwtendbb,         &
+!!$    !        q_tendbb,           qqcw_tendbb,         &
+!!$    !#endif
+!!$    !        dgncur_a,           dgncur_awet,         &
+!!$    !        wetdens,                                 &
+!!$    !        qaerwat                                  )
+!!$    
+!!$    call modal_aero_amicphys_intr(              &
+!!$         mdo_gasaerexch,     mdo_rename,          &
+!!$         mdo_newnuc,         mdo_coag,            &
+!!$         lchnk,    ncol,     nstep,               &
+!!$         loffset,  deltat,                        &
+!!$         latndx,   lonndx,                        &
+!!$         t,        pmid,     pdel,                &
+!!$         zm,       pblh,                          &
+!!$         qv,       cld_ncol,                      &
+!!$         vmr,                vmrcw,               &   ! after  cloud chem
+!!$         vmr_svaa,                                &   ! before gas chem
+!!$         vmr_svbb,           vmrcw_svbb,          &   ! before cloud chem
+!!$         nqtendbb,           nqqcwtendbb,         &
+!!$         dvmrdt_bb,          dvmrcwdt_bb,         &
+!!$         dgncur_a,           dgncur_awet,         &
+!!$         wetdens                                  )
+!!$    
+!!$    
+!!$    
+!!$    dvmrdt_cond(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_cond)
+!!$    dvmrdt_rnam(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_rnam)
+!!$    dvmrdt_nnuc(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_nnuc)
+!!$    dvmrdt_coag(  :,:,:) = dvmrdt_bb(  :,:,:,iqtend_coag)
+!!$    dvmrcwdt_cond(:,:,:) = 0.0_r8
+!!$    dvmrcwdt_rnam(:,:,:) = dvmrcwdt_bb(:,:,:,iqqcwtend_rnam)
+!!$    dvmrcwdt_nnuc(:,:,:) = 0.0_r8
+!!$    dvmrcwdt_coag(:,:,:) = 0.0_r8
+!!$    
+!!$    
+!!$    lun = 6
+!!$    do i = 1, ncol
+!!$       lun = tempunit + i
+!!$       write(lun,'(/a,i8)') 'cambox_do_run doing gasaerexch, istep=', istep
+!!$       if (iwrite3x_units_flagaa >= 10) then
+!!$          tmpch80 = '  (nmol/mol)'
+!!$       else
+!!$          tmpch80 = '  (ppbv)'
+!!$       end if
+!!$       write(lun,'( 2a)') &
+!!$            'k, old & new h2so4, old & new so4_a1, old & new so4_a2', &
+!!$            trim(tmpch80)
+!!$       do k = 1, pver
+!!$          write(lun,'( i4,1p,6(2x,2e12.4))') k, &
+!!$               vmr_svcc(i,k,lmz_h2so4g)*1.0e9, vmr(i,k,lmz_h2so4g)*1.0e9, &
+!!$               vmr_svcc(i,k,lmz_so4_a1)*1.0e9, vmr(i,k,lmz_so4_a1)*1.0e9, &
+!!$               vmr_svcc(i,k,lmz_so4_a2)*1.0e9, vmr(i,k,lmz_so4_a2)*1.0e9
+!!$          if(TESTING==0)then
+!!$             write(tempunit,*)&
+!!$                  vmr_svcc(i,k,lmz_h2so4g), vmr(i,k,lmz_h2so4g), &
+!!$                  vmr_svcc(i,k,lmz_so4_a1), vmr(i,k,lmz_so4_a1), &
+!!$                  vmr_svcc(i,k,lmz_so4_a2), vmr(i,k,lmz_so4_a2)
+!!$          else
+!!$             read(tempunit,*)scr(1),scr(2),scr(3),scr(4),scr(5),scr(6)
+!!$             if(.not.((vmr_svcc(i,k,lmz_h2so4g)==scr(1)).and.&
+!!$                  (vmr(i,k,lmz_h2so4g)==scr(2)).and.&
+!!$                  (vmr_svcc(i,k,lmz_so4_a1)==scr(3)).and.&
+!!$                  (vmr(i,k,lmz_so4_a1)==scr(4)).and.&
+!!$                  (vmr_svcc(i,k,lmz_so4_a2)==scr(5)).and.&
+!!$                  (vmr(i,k,lmz_so4_a2)==scr(6))))call endrun("stop at 5")
+!!$          end if
+!!$       end do
+!!$    end do ! i
+!!$    
+!!$    
+!!$    i = 1 ; k = pver ; lun = 82
+!!$    tmpveca = 0.0_r8
+!!$    tmpveca(101) = vmr_svcc(i,k,lmz_h2so4g)
+!!$    tmpveca(201) = vmr(i,k,lmz_h2so4g)
+!!$    do n = 1, ntot_amode
+!!$       l = lptr_so4_a_amode(n) - loffset
+!!$       if (l > 0) tmpveca(110+n) = vmr_svcc(i,k,l)
+!!$       if (l > 0) tmpveca(210+n) = vmr(i,k,l)
+!!$    end do
+!!$    tmpveca(102) = sum( tmpveca(111:118) )
+!!$    tmpveca(103) = sum( tmpveca(101:102) )
+!!$    tmpveca(202) = sum( tmpveca(211:218) )
+!!$    tmpveca(203) = sum( tmpveca(201:202) )
+!!$    tmpveca = tmpveca*1.0e9_r8
+!!$    write(lun,'(/a,2i5)') 'h2so4g, so4a_tot, sum at i,k =', i, k
+!!$    write(lun,'(/a,1p,3e20.10,10e10.2)') 'before gasaerexch', tmpveca(101:103)
+!!$    write(lun,'(/a,1p,3e20.10,10e10.2)') 'after  gasaerexch', tmpveca(201:203)
+!!$    write(lun,'(/a,2i5)') 'so4a_1-8 at i,k =', i, k
+!!$    write(lun,'(/a,1p,3e20.10,10e10.2)') 'before gasaerexch', tmpveca(111:118)
+!!$    write(lun,'(/a,1p,3e20.10,10e10.2)') 'after  gasaerexch', tmpveca(211:218)
+!!$    
+!!$    call dump4x( 'gaex ', ncol, nstep, vmr_svcc, vmrcw_svcc, vmr, vmrcw )
+!!$    
+!!$    
+!!$    !
+!!$    ! newnuc
+!!$    !
+!!$    if ( 1 == 0 ) then
+!!$       !     deleted all of this
+!!$    end if ! ( 1 == 0 )
+!!$    
+!!$    
+!!$    !
+!!$    ! coag
+!!$    !
+!!$    if ( 1 == 0 ) then
+!!$       !     deleted all of this
+!!$    end if ! ( 1 == 0 )
+!!$    
+!!$    
+!!$    !
+!!$    ! done
+!!$    !
+!!$    lun = 6
+!!$    write(lun,'(/a,i8)') 'cambox_do_run step done, istep=', istep
+!!$    
+!!$    do i = 1, ncol
+!!$       lun = tempunit + i
+!!$       write(lun,'(/a,i8)') 'cambox_do_run step done, istep=', istep
+!!$       
+!!$       do k = 1, pver
+!!$          
+!!$          if (iwrite3x_units_flagaa >= 10) then
+!!$             tmpch80 = '   --   units = nmol/mol & #/mg'
+!!$          else
+!!$             tmpch80 = ' '
+!!$          end if
+!!$          write(lun,'(/a,2i5,2f10.3,a)') 'i, k, told, tnew (h)', i, k, &
+!!$               told/3600.0_r8, tnew/3600.0_r8, trim(tmpch80)
+!!$          write(lun,'(2a)') &
+!!$               'spec              qold       qnew         del-gas', &
+!!$               '   del-cloud del-rena    del-cond  del-nuc   del-coag'
+!!$          do l = 1, gas_pcnst
+!!$             if (iwrite3x_species_flagaa < 10) then
+!!$                !           if (max( vmr_svaa(i,k,l), vmr(i,k,l) ) < 1.0e-35) cycle
+!!$                if (max( vmr_svaa(i,k,l), vmr_svbb(i,k,l), &
+!!$                     vmr_svcc(i,k,l), vmr(i,k,l) ) < 1.0e-35) cycle
+!!$             end if
+!!$             tmpb = adv_mass(l)
+!!$             if (abs(tmpb-1.0_r8) <= 0.1_r8) then
+!!$                tmpa = 1.0e-6 * tmpb/mwdry
+!!$             else
+!!$                tmpa = 1.0e9
+!!$             end if
+!!$             tmpveca(:) = 0.0
+!!$             tmpveca(1) = vmr_svaa(i,k,l)
+!!$             tmpveca(2) = vmr(     i,k,l)
+!!$             tmpveca(3) = vmr_svbb(i,k,l) - vmr_svaa(i,k,l)  ! gaschem
+!!$             tmpveca(4) = vmr_svcc(i,k,l) - vmr_svbb(i,k,l)  ! cloudchem
+!!$             
+!!$             !        tmpveca(5) = dvmrdt_rename(i,k,l)*deltat        ! gasaerexch rename
+!!$             !        tmpveca(6) = vmr_svdd(i,k,l) - vmr_svcc(i,k,l)  ! gasaerexch conden+rename
+!!$             tmpveca(5) = dvmrdt_rnam(i,k,l)*deltat          ! gasaerexch rename
+!!$             tmpveca(6) = dvmrdt_cond(i,k,l)*deltat          ! gasaerexch conden
+!!$             tmpveca(7) = dvmrdt_nnuc(i,k,l)*deltat          ! gasaerexch newnuc
+!!$             tmpveca(8) = dvmrdt_coag(i,k,l)*deltat          ! gasaerexch coagul
+!!$             ! following commented out lines were for old gasaerexch, where you started with 
+!!$             ! tmpveca(6) = vmr_svdd(i,k,l) - vmr_svcc(i,k,l)  ! gasaerexch conden+rename
+!!$             !        tmpb = tmpveca(6)
+!!$             !        tmpveca(6) = tmpveca(6) - tmpveca(5)
+!!$             !        tmpc = max( abs(tmpveca(5)), abs(tmpb),1.0e-20_r8 )
+!!$             !        if (abs(tmpveca(6)) < 1.0e-10*tmpc) tmpveca(6) = 0.0_r8
+!!$             
+!!$             !        tmpveca(7) = vmr_svee(i,k,l) - vmr_svdd(i,k,l)  ! newnuc
+!!$             !        tmpveca(8) = vmr(     i,k,l) - vmr_svee(i,k,l)  ! coag
+!!$             write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') &
+!!$                  cnst_name(l+loffset), tmpveca(1:8)*tmpa
+!!$          end do ! l
+!!$          
+!!$          do l = 1, gas_pcnst
+!!$             if (max( vmrcw_svaa(i,k,l), vmrcw(i,k,l) ) < 1.0e-35) cycle
+!!$             tmpb = adv_mass(l)
+!!$             if (abs(tmpb-1.0_r8) <= 0.1_r8) then
+!!$                tmpa = 1.0e-6 * tmpb/mwdry
+!!$             else
+!!$                tmpa = 1.0e9
+!!$             end if
+!!$             tmpveca(:) = 0.0
+!!$             tmpveca(1) = vmrcw_svaa(i,k,l)
+!!$             tmpveca(2) = vmrcw(     i,k,l)
+!!$             tmpveca(3) = vmrcw_svbb(i,k,l) - vmrcw_svaa(i,k,l)  ! gaschem
+!!$             tmpveca(4) = vmrcw_svcc(i,k,l) - vmrcw_svbb(i,k,l)  ! cloudchem
+!!$             
+!!$             !        tmpveca(5) = dvmrcwdt_rename(i,k,l)*deltat        ! gasaerexch rename
+!!$             !        tmpveca(6) = vmrcw_svdd(i,k,l) - vmrcw_svcc(i,k,l)  ! gasaerexch conden+rename
+!!$             tmpveca(5) = dvmrcwdt_rnam(i,k,l)*deltat          ! gasaerexch rename
+!!$             tmpveca(6) = dvmrcwdt_cond(i,k,l)*deltat          ! gasaerexch conden
+!!$             tmpveca(7) = dvmrcwdt_nnuc(i,k,l)*deltat          ! gasaerexch newnuc
+!!$             tmpveca(8) = dvmrcwdt_coag(i,k,l)*deltat          ! gasaerexch coagul
+!!$             ! following commented out lines were for old gasaerexch, where you started with 
+!!$             ! tmpveca(6) = vmrcw_svdd(i,k,l) - vmrcw_svcc(i,k,l)  ! gasaerexch conden+rename
+!!$             !        tmpb = tmpveca(6)
+!!$             !        tmpveca(6) = tmpveca(6) - tmpveca(5)
+!!$             !        tmpc = max( abs(tmpveca(5)), abs(tmpb),1.0e-20_r8 )
+!!$             !        if (abs(tmpveca(6)) < 1.0e-10*tmpc) tmpveca(6) = 0.0_r8
+!!$             
+!!$             !        tmpveca(7) = vmrcw_svee(i,k,l) - vmrcw_svdd(i,k,l)  ! newnuc
+!!$             !        tmpveca(8) = vmrcw(     i,k,l) - vmrcw_svee(i,k,l)  ! coag
+!!$             tmpveca(9) = tmpveca(2) - tmpveca(1)
+!!$             write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,5e10.2)') &
+!!$                  cnst_name_cw(l+loffset)(1:16), tmpveca(1:8)*tmpa
+!!$          end do ! l
+!!$          
+!!$          tmpveca(:) = 0.0
+!!$          tmpveca( 1) = vmr_svaa(i,k,lmz_so2g) + vmr_svaa(i,k,lmz_h2so4g)
+!!$          tmpveca( 2) = vmr(     i,k,lmz_so2g) + vmr(     i,k,lmz_h2so4g)
+!!$          if (lmz_nh3g > 0) then
+!!$             tmpveca(11) = vmr_svaa(i,k,lmz_nh3g)
+!!$             tmpveca(12) = vmr(     i,k,lmz_nh3g)
+!!$          end if
+!!$          l = lptr2_soa_g_amode(1) - loffset
+!!$          tmpveca(21) = vmr_svaa(i,k,l)
+!!$          tmpveca(22) = vmr(     i,k,l)
+!!$          if (lmz_hno3g > 0) then
+!!$             tmpveca(31) = vmr_svaa(i,k,lmz_hno3g)
+!!$             tmpveca(32) = vmr(     i,k,lmz_hno3g)
+!!$          end if
+!!$          if (lmz_hclg > 0) then
+!!$             tmpveca(41) = vmr_svaa(i,k,lmz_hclg)
+!!$             tmpveca(42) = vmr(     i,k,lmz_hclg)
+!!$          end if
+!!$          do n = 1, ntot_amode
+!!$             l = lptr_so4_a_amode(n) - loffset
+!!$             if (l > 0) then
+!!$                tmpveca( 1) = tmpveca( 1) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
+!!$                tmpveca( 2) = tmpveca( 2) + vmr(     i,k,l) + vmrcw(     i,k,l)
+!!$             end if
+!!$             l = lptr_nh4_a_amode(n) - loffset
+!!$             if (l > 0) then
+!!$                tmpveca(11) = tmpveca(11) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
+!!$                tmpveca(12) = tmpveca(12) + vmr(     i,k,l) + vmrcw(     i,k,l)
+!!$             end if
+!!$             l = lptr2_soa_a_amode(n,1) - loffset
+!!$             if (l > 0) then
+!!$                tmpveca(21) = tmpveca(21) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
+!!$                tmpveca(22) = tmpveca(22) + vmr(     i,k,l) + vmrcw(     i,k,l)
+!!$             end if
+!!$#if ( defined MOSAIC_SPECIES )
+!!$             l = lptr_no3_a_amode(n) - loffset
+!!$             if (l > 0) then
+!!$                tmpveca(31) = tmpveca(31) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
+!!$                tmpveca(32) = tmpveca(32) + vmr(     i,k,l) + vmrcw(     i,k,l)
+!!$             end if
+!!$             l = lptr_cl_a_amode(n) - loffset
+!!$             if (l > 0) then
+!!$                tmpveca(41) = tmpveca(41) + vmr_svaa(i,k,l) + vmrcw_svaa(i,k,l)
+!!$                tmpveca(42) = tmpveca(42) + vmr(     i,k,l) + vmrcw(     i,k,l)
+!!$             end if
+!!$#endif
+!!$          end do
+!!$          tmpveca( 3) = tmpveca( 2) - tmpveca( 1)
+!!$          tmpveca(13) = tmpveca(12) - tmpveca(11)
+!!$          tmpveca(23) = tmpveca(22) - tmpveca(21)
+!!$          tmpveca(33) = tmpveca(32) - tmpveca(31)
+!!$          tmpveca(43) = tmpveca(42) - tmpveca(41)
+!!$          tmpa = 1.0e9
+!!$          write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'sox_tot         ', &
+!!$               tmpveca(1:3)*tmpa
+!!$          write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'nhx_tot         ', &
+!!$               tmpveca(11:13)*tmpa
+!!$          if (maxval( tmpveca(21:23) )*tmpa > 1.0e-10) &
+!!$               write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'soa1_tot        ', &
+!!$               tmpveca(21:23)*tmpa
+!!$          if (maxval( tmpveca(31:33) )*tmpa > 1.0e-10) &
+!!$               write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'no3_tot         ', &
+!!$               tmpveca(31:33)*tmpa
+!!$          if (maxval( tmpveca(41:43) )*tmpa > 1.0e-10) &
+!!$               write(lun,'(a,1p,2e11.3,2x,3e10.2,2x,3e10.2)') 'cl_tot          ', &
+!!$               tmpveca(41:43)*tmpa
+!!$          
+!!$          !     l = lmz_h2so4g
+!!$          !     if (i == 1) then
+!!$          !     write(81,'(/a,10x,2i5,1p,4e12.4,2x,4e12.4)') &
+!!$          !        'main - i, k, q0, q1, q2, q3, d01, d23', i, k, &
+!!$          !        vmr_svaa(i,k,l), vmr_svbb(i,k,l), &
+!!$          !        vmr_svcc(i,k,l), vmr_svdd(i,k,l), &
+!!$          !        vmr_svbb(i,k,l)-vmr_svaa(i,k,l), &
+!!$          !        vmr_svdd(i,k,l)-vmr_svbb(i,k,l)
+!!$          !     write(81,'(/a,10x,2i5,1p,4e12.4,2x,4e12.4)') &
+!!$          !        'main - i, k, qavg, uptkrt            ', i, k, &
+!!$          !        qavg_h2so4_gaex(i,k), uptkrt_h2so4_gaex(i,k)
+!!$          !     end if
+!!$          
+!!$       end do ! k
+!!$       
+!!$    end do ! i
+!!$    
+!!$    
+!!$    !
+!!$    ! switch from vmr & vmrcw to q & qqcw
+!!$    !
+!!$    loffset = imozart - 1
+!!$    do l = imozart, pcnst
+!!$       l2 = l - loffset
+!!$       mmr(  1:ncol,1:pver,l2) = vmr(  1:ncol,1:pver,l2) * adv_mass(l2)/mwdry
+!!$       mmrcw(1:ncol,1:pver,l2) = vmrcw(1:ncol,1:pver,l2) * adv_mass(l2)/mwdry
+!!$       q(    1:ncol,1:pver,l)  = mmr(  1:ncol,1:pver,l2)
+!!$       qqcw( 1:ncol,1:pver,l)  = mmrcw(1:ncol,1:pver,l2)
+!!$    end do
+!!$    
+!!$    
+!!$    ! write binary file
+!!$    lun = 181
+!!$    write(lun) istep, ncol, pver, gas_pcnst, ntot_amode
+!!$    do i = 1, ncol
+!!$       do k = 1, pver
+!!$          write(lun) i, k
+!!$          write(lun) t(i,k), pmid(i,k), qv(i,k), relhum(i,k), cld(i,k), pblh(i)
+!!$          write(lun) qaerwat(i,k,1:ntot_amode)
+!!$          write(lun) dgncur_a(i,k,1:ntot_amode)
+!!$          write(lun) dgncur_awet(i,k,1:ntot_amode)
+!!$          do l = 1, gas_pcnst
+!!$             write(lun) vmr(i,k,l), vmrcw(i,k,l)
+!!$          end do ! l
+!!$       end do ! k
+!!$    end do ! i
     
  end do main_time_loop
  
