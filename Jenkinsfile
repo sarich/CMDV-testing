@@ -4,7 +4,7 @@ pipeline {
         stage('RunTest') {
             steps {
                 echo "Running 'RunTest' stage..."
-		sh '. /etc/profile'
+		sh 'source /etc/profile'
 		sh 'module load singularity/2.4.2'
 		sh 'whoami'
                 sh 'ls'
