@@ -4,6 +4,8 @@ pipeline {
         stage('Test') {
             steps {
                 echo "Running 'Test' stage..."
+		sh '. /etc/profile'
+		sh 'module load singularity'
 		sh 'whoami'
                 sh 'ls'
 		sh 'pwd'
