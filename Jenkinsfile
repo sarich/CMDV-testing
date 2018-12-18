@@ -1,15 +1,9 @@
 pipeline {
     agent any
     stages {
-        stage('Deploy') {
-	    steps {
-	        echo "Running 'Deploy' stage.."
-		sh 'whoami'
-		sh 'hostname'
-            }
-        }		
         stage('Test') {
             steps {
+		checkout scm
                 echo "Running 'Test' stage..."
                 sh 'ls'
 		echo "singularity exec -B ${env.PWD}:/CMDV/CMDV-Testing --pwd /CMDV/CMDV-Testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
