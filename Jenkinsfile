@@ -14,7 +14,6 @@ pipeline {
         stage('Test') {
             steps {
                 sh '. /etc/profile'
-                sh '. init.sh'
 		sh "singularity exec -B $env.pwd():/CMDV/CMDV-Testing --pwd /CMDV/CMDV-Testing test-runner-env-latest.simg ./run_ctest.sh"
 	    
                 echo "Running 'Test' stage..."
