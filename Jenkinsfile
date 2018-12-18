@@ -7,7 +7,7 @@ pipeline {
 		sh 'whoami'
                 sh 'ls'
 		sh 'pwd'
-		sh "singularity exec -B ${env.workspace}:/CMDV/CMDV-Testing --pwd /CMDV/CMDV-Testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
+		sh "singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
 	    
             }
         }
