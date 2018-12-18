@@ -3,7 +3,6 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-		checkout scm
                 echo "Running 'Test' stage..."
 		sh 'whoami'
                 sh 'ls'
