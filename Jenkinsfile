@@ -4,6 +4,8 @@ pipeline {
         stage('Deploy') {
 	    steps {
 	        echo "Running 'Deploy' stage.."
+		sh 'whoami'
+		sh 'hostname'
             }
         }		
         stage('Test') {
