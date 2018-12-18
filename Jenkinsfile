@@ -10,10 +10,11 @@ pipeline {
         }		
         stage('Test') {
             steps {
-                sh '. /etc/profile'
+                echo "Running 'Test' stage..."
+                sh 'ls'
+		echo "singularity exec -B ${PWD}:/CMDV/CMDV-Testing --pwd /CMDV/CMDV-Testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
 		sh "singularity exec -B ${PWD}:/CMDV/CMDV-Testing --pwd /CMDV/CMDV-Testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
 	    
-                echo "Running 'Test' stage..."
             }
         }
     }
