@@ -1,11 +1,11 @@
 pipeline {
     agent any
     stages {
-        stage('Test') {
+        stage('RunTest') {
             steps {
-                echo "Running 'Test' stage..."
+                echo "Running 'RunTest' stage..."
 		sh '. /etc/profile'
-		sh 'module load singularity'
+		sh 'module load singularity/2.4.2'
 		sh 'whoami'
                 sh 'ls'
 		sh 'pwd'
