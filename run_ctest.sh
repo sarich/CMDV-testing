@@ -1,5 +1,6 @@
 #!/bin/bash
-
-. init.sh
+ls
+pwd
+. ./init.sh
 cd cdash
 ctest
