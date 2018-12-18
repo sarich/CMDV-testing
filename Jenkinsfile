@@ -1,18 +1,19 @@
 pipeline {
-    agent {
-        docker {
-            image 'cmdv/test-runner-env:latest' 
-            args "-t -vpwd():/CMDV/CMDV-testing --workdir /CMDV/CMDV-testing --rm bash"
-        }
-    }
+    agent any
     stages {
+        stage('Deploy') {
+	    steps {
+	        echo "Running 'Deploy' stage.."
+	        sh 'source /etc/profile'
+		sh 'singularity pull docker://cmdv/test-runner-env:latest'
+            }
+        }		
         stage('Test') {
             steps {
                 echo "Running 'Test' stage..."
                 sh 'source /etc/profile'
                 sh 'source init.sh'
-                sh 'cd cdash'
-                sh 'ctest'
+		sh "singularity exec -B $env.pwd():/CMDV/CMDV-Testing --pwd /CMDV/CMDV-Testing test-runner-env-latest.simg ./run_ctest.sh"
             }
         }
     }
