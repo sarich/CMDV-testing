@@ -1,5 +1,5 @@
 pipeline {
-    agent {label 'node'}
+    agent {label 'lcrc || sarich-X1'}
     stages {
         stage('PreTest') {
             steps {
