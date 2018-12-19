@@ -4,7 +4,7 @@ pipeline {
         stage('PreTest') {
             steps {
 	        script {
-	          if ($label == 'lcrc') {
+	          if ($(env.NODE_NAME) == 'jenkins-0001.lcrc.anl.gov') {
                     echo 'Running PreTest...'
                     sh '''
                         . /etc/profile
@@ -12,7 +12,7 @@ pipeline {
                         hostname
                         module spider singularity
                     '''
-		  } else if ($label == 'sarich-X1') {
+		  } else if ($(env.NODE_NAME)== 'jenkins-worker') {
 		      echo 'Running PreTest...'
 		      sh 'whoami'
 		      sh 'hostname'
@@ -23,7 +23,7 @@ pipeline {
         stage('RunTest') {
             steps {
 	        script {
-		    if ($label == 'lcrc') {
+		    if ($(env.NODE_NAME) == 'jenkins-0001.lcrc.anl.gov') {
 		      echo "Running 'RunTest' stage..."
                       sh """
                         . /etc/profile
@@ -33,7 +33,7 @@ pipeline {
                         pwd
                         singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh
                       """
-                    } else if ($label == 'sarich-X1') {
+                    } else if ($(env.NODE_NAME) == 'jenkins_worker') {
 		      echo "Running 'RunTest' stage..."
                       sh "singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
                     }	      
