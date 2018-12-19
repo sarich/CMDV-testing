@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('PreTest') {
             steps {
-                sh '. /etc/profile'
+                sh 'source /etc/profile'
 		sh 'whoami'
 		sh 'hostname'
                 echo 'Running PreTest...'
