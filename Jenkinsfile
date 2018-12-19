@@ -1,5 +1,5 @@
 pipeline {
-    agent (label 'slave')
+    agent (label 'nodes')
     stages {
         stage('PreTest') {
             steps {
