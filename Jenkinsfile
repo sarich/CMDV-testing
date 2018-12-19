@@ -43,4 +43,10 @@ pipeline {
             }
         }
     }
+    post {
+        always{
+            archiveArtifacts 'cdash/Testing/Temporary/LastTest.log'
+        }        
+    }
+	    
 }
