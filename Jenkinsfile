@@ -4,6 +4,8 @@ pipeline {
         stage('PreTest') {
             steps {
                 sh '. /etc/profile'
+		sh 'whoami'
+		sh 'hostname'
                 echo 'Running PreTest...'
 		sh 'module spider singularity'
             }
