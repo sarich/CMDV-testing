@@ -1,5 +1,5 @@
 pipeline {
-    agent (label 'lcrc')
+    agent {label 'lcrc'}
     stages {
         stage('PreTest') {
             steps {
