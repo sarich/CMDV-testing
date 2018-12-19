@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('printNode') {
             steps {
-                echo $(env.NODE_NAME)
+                echo env.NODE_NAME
             }
         }
         stage('PreTest') {
