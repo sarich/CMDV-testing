@@ -3,13 +3,20 @@ pipeline {
     stages {
         stage('PreTest') {
             steps {
-                echo 'Running PreTest...'
-                sh '''
-                . /etc/profile
-		whoami
-		hostname
-		module spider singularity
+	        node('lcrc') {
+                    echo 'Running PreTest...'
+                    sh '''
+                    . /etc/profile
+                    whoami
+                    hostname
+                    module spider singularity
                 '''
+		}
+		node('sarich-X1') {
+		    echo 'Running PreTest...'
+		    sh 'whoami'
+		    sh 'hostname'
+                }
             }
 	}
         stage('RunTest') {
