@@ -15,14 +15,14 @@ pipeline {
         stage('RunTest') {
             steps {
                 echo "Running 'RunTest' stage..."
-                sh '''
+                sh """
                 . /etc/profile
                 module load singularity/2.4.2
                 whoami
                 ls
                 pwd
                 singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh
-                '''
+                """
             }
         }
     }
