@@ -4,7 +4,7 @@ pipeline {
         stage('PreTest') {
             steps {
 	        script {
-	          if (${label} == 'lcrc') {
+	          if ($label == 'lcrc') {
                     echo 'Running PreTest...'
                     sh '''
                         . /etc/profile
@@ -12,7 +12,7 @@ pipeline {
                         hostname
                         module spider singularity
                     '''
-		  } else if (${label} == 'sarich-X1) {
+		  } else if ($label == 'sarich-X1') {
 		      echo 'Running PreTest...'
 		      sh 'whoami'
 		      sh 'hostname'
@@ -23,7 +23,7 @@ pipeline {
         stage('RunTest') {
             steps {
 	        script {
-		    if (${label} == 'lcrc') {
+		    if ($label == 'lcrc') {
 		      echo "Running 'RunTest' stage..."
                       sh """
                         . /etc/profile
@@ -33,7 +33,7 @@ pipeline {
                         pwd
                         singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh
                       """
-                    } else if (${label} == 'sarich-X1') {
+                    } else if ($label == 'sarich-X1') {
 		      echo "Running 'RunTest' stage..."
                       sh "singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
                     }	      
