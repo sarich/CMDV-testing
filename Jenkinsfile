@@ -6,16 +6,14 @@ pipeline {
 	        script {
 	          if ($(env.NODE_NAME) == 'jenkins-0001.lcrc.anl.gov') {
                     echo 'Running PreTest...'
-                    sh '''
-                        . /etc/profile
-                        whoami
-                        hostname
-                        module spider singularity
-                    '''
+                    . /etc/profile
+                    whoami
+                    hostname
+                    module spider singularity
 		  } else if ($(env.NODE_NAME)== 'jenkins-worker') {
 		      echo 'Running PreTest...'
-		      sh 'whoami'
-		      sh 'hostname'
+		      whoami
+		      hostname
                   }
                 }
             }
@@ -25,17 +23,15 @@ pipeline {
 	        script {
 		    if ($(env.NODE_NAME) == 'jenkins-0001.lcrc.anl.gov') {
 		      echo "Running 'RunTest' stage..."
-                      sh """
-                        . /etc/profile
-                        module load singularity/2.4.2
-                        whoami
-                        ls
-                        pwd
-                        singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh
-                      """
+                      . /etc/profile
+                      module load singularity/2.4.2
+                      whoami
+                      ls
+                      pwd
+                      singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh
                     } else if ($(env.NODE_NAME) == 'jenkins_worker') {
 		      echo "Running 'RunTest' stage..."
-                      sh "singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh"
+                      singularity exec -B ${env.workspace}:/CMDV/CMDV-testing --pwd /CMDV/CMDV-testing docker://cmdv/test-runner-env:latest ./run_ctest.sh
                     }	      
                 }
             }
